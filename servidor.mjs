@@ -10,6 +10,7 @@ import fs         from 'fs';
 import path       from 'path';
 import { fileURLToPath, URL } from 'url';
 import { controladorDadosDashboard } from './controladores/controlador_dashboard.mjs';
+import { executarBuscarDadosDashboard } from './casos_de_uso/buscar_dados_dashboard.mjs';
 import { configuracoes }             from './configuracoes/configuracao_global.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -29,29 +30,32 @@ const TIPOS_MIME = {
 
 /**
  * Serve arquivos estáticos.
- * Ordem de busca: 1) apresentacao/paginas_web/  2) raiz do projeto
  */
 function servirArquivo(pathname, res) {
-  const nome = pathname === '/' ? 'index.html' : pathname;
-
+  // Se for a raiz, serve o index.html da pasta web
+  let relativePath = pathname === '/' ? '/apresentacao/paginas_web/index.html' : pathname;
+  
   const candidatos = [
-    path.join(__dirname, 'apresentacao', 'paginas_web', nome),
-    path.join(__dirname, nome),
+    path.join(__dirname, relativePath),
+    path.join(__dirname, 'apresentacao', 'paginas_web', relativePath),
+    path.join(__dirname, path.basename(relativePath))
   ];
 
-  const caminho = candidatos.find(p => fs.existsSync(p));
+  const caminho = candidatos.find(p => fs.existsSync(p) && fs.statSync(p).isFile());
 
   if (!caminho) {
+    console.warn(`[AVISO] Arquivo não encontrado: ${pathname}`);
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('404 — Arquivo não encontrado');
     return;
   }
 
-  const ext     = path.extname(caminho);
+  const ext     = path.extname(caminho).toLowerCase();
   const mime    = TIPOS_MIME[ext] || 'application/octet-stream';
 
   fs.readFile(caminho, (err, data) => {
     if (err) {
+      console.error(`[ERRO] Falha ao ler arquivo ${caminho}:`, err.message);
       res.writeHead(500);
       res.end('Erro interno');
     } else {
@@ -61,12 +65,58 @@ function servirArquivo(pathname, res) {
   });
 }
 
+function mapearRespostaLegada(dados) {
+  return {
+    kpis: {
+      accepted: dados.kpis.aceitos,
+      pending: dados.kpis.pendentes,
+    },
+    topPending: dados.top_pendentes.map(item => ({
+      name: item.nome,
+      count: item.total,
+    })),
+    baseDistribution: dados.distribuicao_base.map(item => ({
+      base: item.base,
+      count: item.total,
+    })),
+    summaryTable: dados.tabela_resumo.map(item => ({
+      name: item.nome,
+      material: item.material,
+      count: item.total,
+    })),
+    filters: {
+      technicians: dados.listas_filtros.tecnicos,
+      bases: dados.listas_filtros.bases,
+      materials: dados.listas_filtros.materiais,
+    },
+  };
+}
+
 /** Roteador de requisições */
 const servidor = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
   if (url.pathname === '/api/dados_dashboard') {
     await controladorDadosDashboard(req, res, url);
+    return;
+  }
+
+  if (url.pathname === '/api/data') {
+    const filtros = {
+      nome: url.searchParams.get('nome') || url.searchParams.get('name') || null,
+      material: url.searchParams.get('material') || null,
+      base: url.searchParams.get('base') || null,
+      status: url.searchParams.get('status') || null,
+    };
+
+    try {
+      const dados = await executarBuscarDadosDashboard(filtros);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(mapearRespostaLegada(dados)));
+    } catch (erro) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ erro: 'Erro interno do servidor' }));
+    }
     return;
   }
 

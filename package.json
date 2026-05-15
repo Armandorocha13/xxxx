@@ -2,10 +2,10 @@
   "name": "aceitependente",
   "version": "1.0.0",
   "description": "",
-  "main": "extract_headers.js",
+  "main": "servidor.mjs",
   "scripts": {
     "test": "vitest run",
-    "import": "node import_data.mjs"
+    "import": "node scripts/import_data.mjs"
   },
   "keywords": [],
   "author": "",

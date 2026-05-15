@@ -1,7 +1,14 @@
 import xlsx from 'xlsx';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const files = ['planilha_movimentacao_tecnico.xlsx', 'relatorio_equipamento.xlsx'];
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const files = [
+  path.join(__dirname, '..', 'dados', 'planilha_movimentacao_tecnico.xlsx'),
+  path.join(__dirname, '..', 'dados', 'relatorio_equipamento.xlsx'),
+];
 
 files.forEach(file => {
   if (fs.existsSync(file)) {

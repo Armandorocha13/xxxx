@@ -17,72 +17,62 @@
 </head>
 <body>
 
-    <!-- Fundo animado Liquid Glass -->
-    <div class="fundo-animado" aria-hidden="true">
-        <div class="bolha b1"></div>
-        <div class="bolha b2"></div>
-        <div class="bolha b3"></div>
-    </div>
-
     <div class="layout">
 
-        <!-- ═══ NAVBAR ═══ -->
-        <header class="navbar glass animate__animated animate__fadeInDown">
-            <div class="navbar-inner">
-                <div class="marca">
-                    <img src="logo.png" alt="Logo" class="logo">
-                    <div class="divisor"></div>
-                    <div class="titulo-wrapper">
-                        <span class="subtitulo">Dashboard</span>
-                        <h1>ACEITES PENDENTES</h1>
-                    </div>
+        <!-- ═══ SIDEBAR (NAVBAR + FILTROS) ═══ -->
+        <aside class="navbar animate__animated animate__fadeInLeft">
+            <div class="marca">
+                <img src="logo.png" alt="Logo" class="logo">
+                <div class="titulo-wrapper">
+                    <h1>ACEITES PENDENTES</h1>
                 </div>
-                <nav class="seletor-projeto" aria-label="Seleção de projeto">
-                    <button id="btn-emis" class="active" aria-pressed="true">EMIS</button>
-                    <button id="btn-eter" aria-pressed="false">ETER</button>
-                </nav>
             </div>
-        </header>
 
-        <main class="conteudo">
+            <nav class="seletor-projeto" aria-label="Seleção de projeto">
+                <button id="btn-emis" class="active" aria-pressed="true">EMIS</button>
+                <button id="btn-eter" aria-pressed="false">ETER</button>
+            </nav>
 
-            <!-- ═══ FILTROS ═══ -->
-            <section class="filtros-card glass animate__animated animate__fadeIn" aria-label="Filtros">
+            <section class="filtros-card" aria-label="Filtros">
                 <div class="filtros-titulo">
                     <i data-lucide="filter"></i>
                     <span>FILTRAR DADOS</span>
                 </div>
                 <div class="filtros-grid">
                     <div class="campo">
-                        <label for="filtro-nome">
-                            <i data-lucide="user"></i> TÉCNICO
-                        </label>
+                        <label for="filtro-status">STATUS</label>
+                        <select id="filtro-status">
+                            <option value="all">Todos os status</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Aceito">Aceito</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="filtro-nome">TÉCNICO</label>
                         <select id="filtro-nome">
                             <option value="all">Todos os técnicos</option>
                         </select>
                     </div>
                     <div class="campo">
-                        <label for="filtro-base">
-                            <i data-lucide="map-pin"></i> BASE
-                        </label>
+                        <label for="filtro-base">BASE</label>
                         <select id="filtro-base">
                             <option value="all">Todas as bases</option>
                         </select>
                     </div>
                     <div class="campo">
-                        <label for="filtro-material">
-                            <i data-lucide="package"></i> MATERIAL
-                        </label>
+                        <label for="filtro-material">MATERIAL</label>
                         <select id="filtro-material">
                             <option value="all">Todos os materiais</option>
                         </select>
                     </div>
                     <button id="btn-atualizar" class="botao-filtro" type="button">
-                        <i data-lucide="search"></i>
-                        <span>FILTRAR</span>
+                        FILTRAR AGORA
                     </button>
                 </div>
             </section>
+        </aside>
+
+        <main class="conteudo">
 
             <!-- ═══ KPIs ═══ -->
             <section class="kpis-row" aria-label="Indicadores">
@@ -106,9 +96,35 @@
                 </div>
             </section>
 
-            <!-- ═══ GRÁFICOS ═══ -->
-            <section class="graficos-row" aria-label="Gráficos">
-                <div class="grafico-card glass animate__animated animate__fadeInLeft" style="--delay:.3s">
+            <!-- ═══ TABELA (FOCO PRINCIPAL) ═══ -->
+            <section class="tabela-card glass animate__animated animate__fadeInUp" style="--delay:.1s" aria-label="Tabela de pendências">
+                <div class="tabela-header">
+                    <div class="titulo-grupo">
+                        <h2><i data-lucide="table-2"></i> DETALHAMENTO DE PENDÊNCIAS</h2>
+                        <p>Lista consolidada por técnico, base e material</p>
+                    </div>
+                    <span id="contagem-registros" class="badge" aria-live="polite">–</span>
+                </div>
+                <div class="tabela-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">TÉCNICO</th>
+                                <th scope="col">BASE</th>
+                                <th scope="col">MATERIAL</th>
+                                <th scope="col">STATUS</th>
+                                <th scope="col" class="center">DIAS</th>
+                                <th scope="col" class="right">QTD</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-tabela"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ═══ GRÁFICOS (ANÁLISE SECUNDÁRIA) ═══ -->
+            <section class="graficos-row" aria-label="Gráficos de Análise">
+                <div class="grafico-card glass animate__animated animate__fadeInLeft" style="--delay:.2s">
                     <div class="card-header">
                         <div>
                             <h2><i data-lucide="bar-chart-horizontal-big"></i> TOP 5 PENDÊNCIAS</h2>
@@ -119,7 +135,7 @@
                         <canvas id="grafico-tecnicos"></canvas>
                     </div>
                 </div>
-                <div class="grafico-card glass animate__animated animate__fadeInRight" style="--delay:.4s">
+                <div class="grafico-card glass animate__animated animate__fadeInRight" style="--delay:.3s">
                     <div class="card-header">
                         <div>
                             <h2><i data-lucide="bar-chart-2"></i> PENDÊNCIAS POR BASE</h2>
@@ -129,26 +145,6 @@
                     <div class="canvas-box">
                         <canvas id="grafico-bases"></canvas>
                     </div>
-                </div>
-            </section>
-
-            <!-- ═══ TABELA ═══ -->
-            <section class="tabela-card glass animate__animated animate__fadeInUp" style="--delay:.5s" aria-label="Tabela de pendências">
-                <div class="tabela-header">
-                    <h2><i data-lucide="table-2"></i> DETALHAMENTO DE PENDÊNCIAS</h2>
-                    <span id="contagem-registros" class="badge" aria-live="polite">–</span>
-                </div>
-                <div class="tabela-scroll">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th scope="col">TÉCNICO</th>
-                                <th scope="col">MATERIAL</th>
-                                <th scope="col" class="right">QTD PENDENTE</th>
-                            </tr>
-                        </thead>
-                        <tbody id="corpo-tabela"></tbody>
-                    </table>
                 </div>
             </section>
 

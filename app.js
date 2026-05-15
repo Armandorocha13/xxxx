@@ -123,9 +123,14 @@ async function loadDashboard() {
         populateDropdown('filter-base', data.filters.bases);
         populateDropdown('filter-material', data.filters.materials);
 
-        updateKPIs(data.kpis);
-        updateCharts(data);
-        updateTable(data.summaryTable);
+         updateKPIs(data.kpis);
+         updateTable(data.summaryTable);
+
+         try {
+             updateCharts(data);
+         } catch (chartError) {
+             console.error('Failed to render charts:', chartError);
+         }
         console.log('Dashboard updated successfully');
     } catch (err) {
         console.error('Failed to load dashboard:', err);

@@ -1,8 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const css = fs.readFileSync(path.resolve(__dirname, './style.css'), 'utf8');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const css = fs.readFileSync(path.resolve(__dirname, '..', 'style.css'), 'utf8');
 
 describe('Dashboard Layout CSS Requirements', () => {
   it('should have a horizontal KPI row with multiple columns', () => {

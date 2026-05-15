@@ -29,7 +29,7 @@ export async function executarBuscarDadosDashboard(filtros = {}) {
       buscarTopPendentes(filtros),
       buscarDistribuicaoPorBase(filtros),
       buscarTabelaDetalhada(filtros),
-      buscarListasFiltros(),
+      buscarListasFiltros(filtros),
     ]);
 
   return {

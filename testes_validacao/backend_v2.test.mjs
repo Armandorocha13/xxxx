@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getDashboardData } from './dashboard.mjs';
+import { getDashboardData } from '../dashboard.mjs';
 
 describe('Dashboard Backend Dropdown Data', () => {
   it('should return unique lists for filters', async () => {

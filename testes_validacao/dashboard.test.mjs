@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getDashboardData } from './dashboard.mjs';
+import { getDashboardData } from '../dashboard.mjs';
 
 describe('Dashboard Data Logic', () => {
   it('should return KPI data with accepted and pending counts', async () => {

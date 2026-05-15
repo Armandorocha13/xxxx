@@ -1,4 +1,4 @@
-import { getDashboardData } from './dashboard.mjs';
+import { getDashboardData } from '../dashboard.mjs';
 
 async function test() {
   const data = await getDashboardData();

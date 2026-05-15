@@ -2,8 +2,11 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const html = fs.readFileSync(path.resolve(__dirname, './index.html'), 'utf8');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const html = fs.readFileSync(path.resolve(__dirname, '..', 'index.html'), 'utf8');
 
 describe('Dashboard V2 Layout Requirements', () => {
   let dom;

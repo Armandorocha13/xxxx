@@ -1,4 +1,4 @@
 @echo off
 echo Iniciando servidor do dashboard...
-node servidor.mjs
+node "%~dp0..\servidor.mjs"
 pause

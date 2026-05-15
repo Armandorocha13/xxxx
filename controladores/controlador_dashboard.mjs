@@ -17,9 +17,10 @@ import { executarBuscarDadosDashboard } from '../casos_de_uso/buscar_dados_dashb
 export async function controladorDadosDashboard(req, res, url) {
   // Extrai os filtros dos query params da URL
   const filtros = {
-    nome: url.searchParams.get('nome') || null,
+    nome: url.searchParams.get('nome') || url.searchParams.get('name') || null,
     material: url.searchParams.get('material') || null,
     base: url.searchParams.get('base') || null,
+    status: url.searchParams.get('status') || null,
   };
 
   try {

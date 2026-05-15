@@ -5,13 +5,14 @@ dotenv.config();
 const sql = neon(process.env.DATABASE_URL);
 
 export async function getDashboardData(filters = {}) {
-  const { name, material, base } = filters;
+  const { name, nome, material, base } = filters;
+  const selectedName = name || nome;
   
   // Base query filter
   let filterSql = '';
   const params = [];
-  if (name && name !== 'all') {
-    params.push(name);
+  if (selectedName && selectedName !== 'all') {
+    params.push(selectedName);
     filterSql += ` AND recebido_por = $${params.length}`;
   }
   if (material && material !== 'all') {

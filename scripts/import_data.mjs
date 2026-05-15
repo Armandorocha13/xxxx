@@ -2,10 +2,15 @@ import { neon } from '@neondatabase/serverless';
 import xlsx from 'xlsx';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
 const sql = neon(process.env.DATABASE_URL);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const dadosDir = path.join(__dirname, '..', 'dados');
 
 async function clearTables() {
   console.log('Clearing existing data...');
@@ -81,8 +86,8 @@ const mappingEquipamento = {
 async function main() {
   try {
     await clearTables();
-    await importFile('planilha_movimentacao_tecnico.xlsx', 'movimentacao_tecnico');
-    await importFile('relatorio_equipamento.xlsx', 'relatorio_equipamento', mappingEquipamento);
+    await importFile(path.join(dadosDir, 'planilha_movimentacao_tecnico.xlsx'), 'movimentacao_tecnico');
+    await importFile(path.join(dadosDir, 'relatorio_equipamento.xlsx'), 'relatorio_equipamento', mappingEquipamento);
     console.log('All imports completed successfully!');
   } catch (error) {
     console.error('Import failed:', error);
