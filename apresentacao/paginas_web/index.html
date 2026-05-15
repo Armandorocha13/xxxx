@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento de Aceites Pendentes</title>
+    <meta name="description" content="Dashboard corporativo para monitoramento de aceites pendentes EMIS/ETER">
+
+    <link rel="stylesheet" href="estilo.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <!-- Fundo animado Liquid Glass -->
+    <div class="fundo-animado" aria-hidden="true">
+        <div class="bolha b1"></div>
+        <div class="bolha b2"></div>
+        <div class="bolha b3"></div>
+    </div>
+
+    <div class="layout">
+
+        <!-- ═══ NAVBAR ═══ -->
+        <header class="navbar glass animate__animated animate__fadeInDown">
+            <div class="navbar-inner">
+                <div class="marca">
+                    <img src="logo.png" alt="Logo" class="logo">
+                    <div class="divisor"></div>
+                    <div class="titulo-wrapper">
+                        <span class="subtitulo">Dashboard</span>
+                        <h1>ACEITES PENDENTES</h1>
+                    </div>
+                </div>
+                <nav class="seletor-projeto" aria-label="Seleção de projeto">
+                    <button id="btn-emis" class="active" aria-pressed="true">EMIS</button>
+                    <button id="btn-eter" aria-pressed="false">ETER</button>
+                </nav>
+            </div>
+        </header>
+
+        <main class="conteudo">
+
+            <!-- ═══ FILTROS ═══ -->
+            <section class="filtros-card glass animate__animated animate__fadeIn" aria-label="Filtros">
+                <div class="filtros-titulo">
+                    <i data-lucide="filter"></i>
+                    <span>FILTRAR DADOS</span>
+                </div>
+                <div class="filtros-grid">
+                    <div class="campo">
+                        <label for="filtro-nome">
+                            <i data-lucide="user"></i> TÉCNICO
+                        </label>
+                        <select id="filtro-nome">
+                            <option value="all">Todos os técnicos</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="filtro-base">
+                            <i data-lucide="map-pin"></i> BASE
+                        </label>
+                        <select id="filtro-base">
+                            <option value="all">Todas as bases</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="filtro-material">
+                            <i data-lucide="package"></i> MATERIAL
+                        </label>
+                        <select id="filtro-material">
+                            <option value="all">Todos os materiais</option>
+                        </select>
+                    </div>
+                    <button id="btn-atualizar" class="botao-filtro" type="button">
+                        <i data-lucide="search"></i>
+                        <span>FILTRAR</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ═══ KPIs ═══ -->
+            <section class="kpis-row" aria-label="Indicadores">
+                <div class="kpi glass animate__animated animate__fadeInUp" style="--delay:.1s">
+                    <div class="kpi-left">
+                        <span class="kpi-label">TOTAL ACEITO</span>
+                        <span class="kpi-num" id="kpi-aceitos" aria-live="polite">–</span>
+                    </div>
+                    <div class="kpi-icon verde">
+                        <i data-lucide="check-circle-2"></i>
+                    </div>
+                </div>
+                <div class="kpi glass destaque animate__animated animate__fadeInUp" style="--delay:.2s">
+                    <div class="kpi-left">
+                        <span class="kpi-label">TOTAL PENDENTE</span>
+                        <span class="kpi-num" id="kpi-pendentes" aria-live="polite">–</span>
+                    </div>
+                    <div class="kpi-icon vermelho">
+                        <i data-lucide="alert-circle"></i>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ GRÁFICOS ═══ -->
+            <section class="graficos-row" aria-label="Gráficos">
+                <div class="grafico-card glass animate__animated animate__fadeInLeft" style="--delay:.3s">
+                    <div class="card-header">
+                        <div>
+                            <h2><i data-lucide="bar-chart-horizontal-big"></i> TOP 5 PENDÊNCIAS</h2>
+                            <p>Por técnico responsável</p>
+                        </div>
+                    </div>
+                    <div class="canvas-box">
+                        <canvas id="grafico-tecnicos"></canvas>
+                    </div>
+                </div>
+                <div class="grafico-card glass animate__animated animate__fadeInRight" style="--delay:.4s">
+                    <div class="card-header">
+                        <div>
+                            <h2><i data-lucide="bar-chart-2"></i> PENDÊNCIAS POR BASE</h2>
+                            <p>Distribuição regional</p>
+                        </div>
+                    </div>
+                    <div class="canvas-box">
+                        <canvas id="grafico-bases"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ TABELA ═══ -->
+            <section class="tabela-card glass animate__animated animate__fadeInUp" style="--delay:.5s" aria-label="Tabela de pendências">
+                <div class="tabela-header">
+                    <h2><i data-lucide="table-2"></i> DETALHAMENTO DE PENDÊNCIAS</h2>
+                    <span id="contagem-registros" class="badge" aria-live="polite">–</span>
+                </div>
+                <div class="tabela-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">TÉCNICO</th>
+                                <th scope="col">MATERIAL</th>
+                                <th scope="col" class="right">QTD PENDENTE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-tabela"></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script type="module" src="aplicacao.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

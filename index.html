@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Aceites | Premium</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <img src="Logo_png02.png" alt="Logo" class="main-logo">
+            <div class="nav-divider"></div>
+            <h1>RELATÓRIO DE ACEITES PENDENTES</h1>
+            <div class="project-toggle">
+                <button id="btn-emis" class="active">EMIS</button>
+                <button id="btn-eter">ETER</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="filter-section">
+            <div class="filter-group">
+                <div class="input-wrapper">
+                    <label>TÉCNICO</label>
+                    <select id="filter-name">
+                        <option value="all">Todos os técnicos</option>
+                    </select>
+                </div>
+                <div class="input-wrapper">
+                    <label>BASE</label>
+                    <select id="filter-base">
+                        <option value="all">Todas as bases</option>
+                    </select>
+                </div>
+                <div class="input-wrapper">
+                    <label>MATERIAL</label>
+                    <select id="filter-material">
+                        <option value="all">Todos os materiais</option>
+                    </select>
+                </div>
+                <button id="btn-search" class="primary-btn">FILTRAR</button>
+            </div>
+        </section>
+
+        <section class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-info">
+                    <span class="kpi-label">TOTAL ACEITO</span>
+                    <span class="kpi-value" id="kpi-accepted">0</span>
+                </div>
+                <div class="kpi-icon accepted">✓</div>
+            </div>
+            <div class="kpi-card highlight">
+                <div class="kpi-info">
+                    <span class="kpi-label">TOTAL PENDENTE</span>
+                    <span class="kpi-value" id="kpi-pending">0</span>
+                </div>
+                <div class="kpi-icon pending">!</div>
+            </div>
+        </section>
+
+        <section class="charts-row">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>TOP 5 PENDÊNCIAS</h3>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="chart-bar"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>VOLUMETRIA POR BASE</h3>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="chart-base-bar"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="table-section">
+            <div class="table-header">
+                <h3>RESUMO DE MOVIMENTAÇÕES</h3>
+                <span class="row-count" id="row-count"></span>
+            </div>
+            <div class="table-container scrollable">
+                <table id="summary-table">
+                    <thead>
+                        <tr>
+                            <th>TÉCNICO</th>
+                            <th>MATERIAL</th>
+                            <th class="text-right">QUANTIDADE PENDENTE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

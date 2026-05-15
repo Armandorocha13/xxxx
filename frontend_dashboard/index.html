@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento de Aceites | LiquidGlass Edition</title>
+    
+    <!-- Bibliotecas Externas -->
+    <link rel="stylesheet" href="estilo.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <!-- Scripts Base -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <!-- Background Animado -->
+    <div class="fundo-animado">
+        <div class="bolha bolha-1"></div>
+        <div class="bolha bolha-2"></div>
+        <div class="bolha bolha-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Barra de Navegação Superior (Glass) -->
+        <header class="navbar glass animate__animated animate__fadeInDown">
+            <div class="nav-content">
+                <div class="brand">
+                    <img src="../Logo_png02.png" alt="Logo" class="logo">
+                    <div class="divider"></div>
+                    <h2>RELATÓRIO DE ACEITES PENDENTES</h2>
+                </div>
+                <div class="projeto-seletor">
+                    <button id="btn-emis" class="active">EMIS</button>
+                    <button id="btn-eter">ETER</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="conteudo-principal">
+            <!-- Seção de Filtros (Glass) -->
+            <section class="filtros-container glass animate__animated animate__fadeInUp">
+                <div class="grid-filtros">
+                    <div class="campo-filtro">
+                        <label><i data-lucide="user"></i> TÉCNICO</label>
+                        <select id="filtro-nome">
+                            <option value="all">Todos os técnicos</option>
+                        </select>
+                    </div>
+                    <div class="campo-filtro">
+                        <label><i data-lucide="map-pin"></i> BASE</label>
+                        <select id="filtro-base">
+                            <option value="all">Todas as bases</option>
+                        </select>
+                    </div>
+                    <div class="campo-filtro">
+                        <label><i data-lucide="package"></i> MATERIAL</label>
+                        <select id="filtro-material">
+                            <option value="all">Todos os materiais</option>
+                        </select>
+                    </div>
+                    <button id="btn-atualizar" class="botao-primario">
+                        <i data-lucide="refresh-cw"></i> ATUALIZAR
+                    </button>
+                </div>
+            </section>
+
+            <!-- Cards de KPI -->
+            <section class="kpis-grid">
+                <div class="kpi-card glass animate__animated animate__zoomIn" style="animation-delay: 0.1s">
+                    <div class="kpi-icone aceito"><i data-lucide="check-circle"></i></div>
+                    <div class="kpi-dados">
+                        <span class="label">TOTAL ACEITO</span>
+                        <span class="valor" id="kpi-aceitos">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card glass destaque animate__animated animate__zoomIn" style="animation-delay: 0.2s">
+                    <div class="kpi-icone pendente"><i data-lucide="alert-circle"></i></div>
+                    <div class="kpi-dados">
+                        <span class="label">TOTAL PENDENTE</span>
+                        <span class="valor" id="kpi-pendentes">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Grid de Gráficos -->
+            <section class="graficos-row">
+                <div class="grafico-wrapper glass animate__animated animate__fadeInLeft" style="animation-delay: 0.3s">
+                    <div class="cabecalho-card">
+                        <h3><i data-lucide="trending-up"></i> TOP 5 PENDÊNCIAS</h3>
+                        <p>Por técnico responsável</p>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="grafico-barras-tecnicos"></canvas>
+                    </div>
+                </div>
+                <div class="grafico-wrapper glass animate__animated animate__fadeInRight" style="animation-delay: 0.4s">
+                    <div class="cabecalho-card">
+                        <h3><i data-lucide="bar-chart-2"></i> PENDÊNCIAS POR BASE</h3>
+                        <p>Distribuição regional</p>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="grafico-barras-bases"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tabela de Dados -->
+            <section class="tabela-container glass animate__animated animate__fadeInUp" style="animation-delay: 0.5s">
+                <div class="cabecalho-tabela">
+                    <h3><i data-lucide="list"></i> DETALHAMENTO DE PENDÊNCIAS</h3>
+                    <span id="contagem-registros" class="badge">Carregando...</span>
+                </div>
+                <div class="tabela-scroll">
+                    <table id="tabela-resumo">
+                        <thead>
+                            <tr>
+                                <th>TÉCNICO</th>
+                                <th>MATERIAL</th>
+                                <th class="alinhar-direita">QTD PENDENTE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-tabela">
+                            <!-- Inserido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="aplicacao.js"></script>
+    <script>
+        // Inicializa os ícones Lucide
+        lucide.createIcons();
+    </script>
+</body>
+</html>
