@@ -17,6 +17,7 @@ import { executarBuscarDadosDashboard } from '../casos_de_uso/buscar_dados_dashb
 export async function controladorDadosDashboard(req, res, url) {
   // Extrai os filtros dos query params da URL
   const filtros = {
+    projeto: url.searchParams.get('projeto') || 'EMIS',
     nome: url.searchParams.get('nome') || url.searchParams.get('name') || null,
     material: url.searchParams.get('material') || null,
     base: url.searchParams.get('base') || null,

@@ -103,6 +103,7 @@ const servidor = http.createServer(async (req, res) => {
 
   if (url.pathname === '/api/data') {
     const filtros = {
+      projeto: url.searchParams.get('projeto') || 'EMIS',
       nome: url.searchParams.get('nome') || url.searchParams.get('name') || null,
       material: url.searchParams.get('material') || null,
       base: url.searchParams.get('base') || null,

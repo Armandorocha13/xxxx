@@ -39,7 +39,7 @@
                     <span>FILTRAR DADOS</span>
                 </div>
                 <div class="filtros-grid">
-                    <div class="campo">
+                    <div class="campo" id="container-filtro-status">
                         <label for="filtro-status">STATUS</label>
                         <select id="filtro-status">
                             <option value="all">Todos os status</option>
@@ -76,7 +76,7 @@
 
             <!-- ═══ KPIs ═══ -->
             <section class="kpis-row" aria-label="Indicadores">
-                <div class="kpi glass animate__animated animate__fadeInUp" style="--delay:.1s">
+                <div id="card-kpi-aceitos" class="kpi glass animate__animated animate__fadeInUp" style="--delay:.1s">
                     <div class="kpi-left">
                         <span class="kpi-label">TOTAL ACEITO</span>
                         <span class="kpi-num" id="kpi-aceitos" aria-live="polite">–</span>

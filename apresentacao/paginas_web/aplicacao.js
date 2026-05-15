@@ -23,7 +23,19 @@ const elKpiPendentes   = document.getElementById('kpi-pendentes');
 const elCorpoTabela    = document.getElementById('corpo-tabela');
 const elContagem       = document.getElementById('contagem-registros');
 
+// ── Estado da Aplicação ──────────────────────────────
+let projetoAtivo = 'EMIS';
+
 // ── Funções de UI ──────────────────────────────────────
+
+/**
+ * Reseta os menus suspensos para carregar novos dados.
+ */
+function resetarFiltros() {
+    [elFiltroNome, elFiltroBase, elFiltroMaterial].forEach(el => {
+        el.innerHTML = `<option value="all">Carregando...</option>`;
+    });
+}
 
 /**
  * Popula um <select> com opções únicas do banco.
@@ -106,22 +118,27 @@ function atualizarTabela(linhas) {
  */
 async function carregarDashboard() {
     try {
+        // Toggle de visibilidade baseado no projeto
+        const isEter = projetoAtivo === 'ETER';
+        const elCardAceitos = document.getElementById('card-kpi-aceitos');
+        const elFiltroStatusCont = document.getElementById('container-filtro-status');
+        
+        if (elCardAceitos) elCardAceitos.style.display = isEter ? 'none' : 'flex';
+        if (elFiltroStatusCont) elFiltroStatusCont.style.display = isEter ? 'none' : 'block';
+
         const filtros = {
+            projeto:  projetoAtivo,
             nome:     elFiltroNome.value,
             material: elFiltroMaterial.value,
             base:     elFiltroBase.value,
-            status:   elFiltroStatus.value,
+            status:   isEter ? 'Pendente' : (elFiltroStatus?.value || 'all'),
         };
 
         const dados = await buscarDados(filtros);
 
         // Popula os menus suspensos
-        // A base nunca muda para permitir trocar entre bases facilmente
-        if (elFiltroBase.options.length <= 1) {
-            popularMenuSuspenso(elFiltroBase, dados.listas_filtros.bases);
-        }
-
-        // Técnicos e Materiais são atualizados dinamicamente
+        // Sempre repopula para garantir sincronia com o projeto
+        popularMenuSuspenso(elFiltroBase,     dados.listas_filtros.bases, true);
         popularMenuSuspenso(elFiltroNome,     dados.listas_filtros.tecnicos, true);
         popularMenuSuspenso(elFiltroMaterial, dados.listas_filtros.materiais, true);
 
@@ -163,17 +180,25 @@ elBtnAtualizar.addEventListener('click', e => {
 
 // Alternância de projeto (EMIS / ETER)
 document.getElementById('btn-emis').addEventListener('click', function () {
+    if (projetoAtivo === 'EMIS') return;
+    projetoAtivo = 'EMIS';
     this.classList.add('active');
     this.setAttribute('aria-pressed', 'true');
     document.getElementById('btn-eter').classList.remove('active');
     document.getElementById('btn-eter').setAttribute('aria-pressed', 'false');
+    resetarFiltros();
+    carregarDashboard();
 });
 
 document.getElementById('btn-eter').addEventListener('click', function () {
+    if (projetoAtivo === 'ETER') return;
+    projetoAtivo = 'ETER';
     this.classList.add('active');
     this.setAttribute('aria-pressed', 'true');
     document.getElementById('btn-emis').classList.remove('active');
     document.getElementById('btn-emis').setAttribute('aria-pressed', 'false');
+    resetarFiltros();
+    carregarDashboard();
 });
 
 // ── Inicialização ──────────────────────────────────────
