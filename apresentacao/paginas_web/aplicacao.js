@@ -13,15 +13,16 @@ import { buscarDados } from './servicos_api.js';
 import { renderizarGraficoTecnicos, renderizarGraficoBases } from './renderizador_graficos.js';
 
 // ── Referências aos elementos do DOM ──────────────────
-const elFiltroStatus   = document.getElementById('filtro-status');
-const elFiltroNome     = document.getElementById('filtro-nome');
-const elFiltroBase     = document.getElementById('filtro-base');
-const elFiltroMaterial = document.getElementById('filtro-material');
-const elBtnAtualizar   = document.getElementById('btn-atualizar');
-const elKpiAceitos     = document.getElementById('kpi-aceitos');
-const elKpiPendentes   = document.getElementById('kpi-pendentes');
-const elCorpoTabela    = document.getElementById('corpo-tabela');
-const elContagem       = document.getElementById('contagem-registros');
+const elFiltroStatus     = document.getElementById('filtro-status');
+const elFiltroNome       = document.getElementById('filtro-nome');
+const elFiltroBase       = document.getElementById('filtro-base');
+const elFiltroMaterial   = document.getElementById('filtro-material');
+const elBtnAtualizar     = document.getElementById('btn-atualizar');
+const elKpiAceitos       = document.getElementById('kpi-aceitos');
+const elKpiPendentes     = document.getElementById('kpi-pendentes');
+const elCorpoTabela      = document.getElementById('corpo-tabela');
+const elContagem         = document.getElementById('contagem-registros');
+const elTextoAtualizacao = document.getElementById('texto-atualizacao');
 
 // ── Estado da Aplicação ──────────────────────────────
 let projetoAtivo = 'EMIS';
@@ -146,6 +147,12 @@ async function carregarDashboard() {
         atualizarKPIs(dados.kpis);
         atualizarTabela(dados.tabela_resumo);
 
+        // Exibe a última atualização (apenas a data)
+        if (elTextoAtualizacao && dados.ultima_atualizacao) {
+            // Extrai só a data (DD/MM/AAAA) da string formatada
+            elTextoAtualizacao.textContent = dados.ultima_atualizacao.split(', ')[0] || dados.ultima_atualizacao;
+        }
+
         // Os gráficos dependem de Chart.js; se a lib falhar, o restante continua visível.
         try {
             renderizarGraficoTecnicos(dados.top_pendentes);
@@ -167,13 +174,7 @@ async function carregarDashboard() {
 
 // ── Event Listeners ────────────────────────────────────
 
-// Botão de filtro (manual)
-elBtnAtualizar.addEventListener('click', e => {
-    e.preventDefault();
-    carregarDashboard();
-});
-
-// Filtros Dinâmicos (atualizam ao mudar)
+// Filtros Dinâmicos — atualizam ao mudar sem precisar clicar em botão
 [elFiltroNome, elFiltroBase, elFiltroMaterial, elFiltroStatus].forEach(el => {
     if (el) el.addEventListener('change', () => carregarDashboard());
 });

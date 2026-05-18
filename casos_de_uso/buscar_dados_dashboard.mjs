@@ -12,6 +12,7 @@ import {
   buscarDistribuicaoPorBase,
   buscarTabelaDetalhada,
   buscarListasFiltros,
+  buscarUltimaAtualizacao,
 } from '../repositorios/repositorio_aceites.mjs';
 
 /**
@@ -23,13 +24,14 @@ import {
  */
 export async function executarBuscarDadosDashboard(filtros = {}) {
   // Executa consultas em paralelo para melhor performance
-  const [kpis, topPendentes, distribuicaoBase, tabelaDetalhada, listasFiltros] =
+  const [kpis, topPendentes, distribuicaoBase, tabelaDetalhada, listasFiltros, ultimaAtualizacao] =
     await Promise.all([
       buscarKpis(filtros),
       buscarTopPendentes(filtros),
       buscarDistribuicaoPorBase(filtros),
       buscarTabelaDetalhada(filtros),
       buscarListasFiltros(filtros),
+      buscarUltimaAtualizacao(filtros),
     ]);
 
   return {
@@ -38,5 +40,6 @@ export async function executarBuscarDadosDashboard(filtros = {}) {
     distribuicao_base: distribuicaoBase,
     tabela_resumo: tabelaDetalhada,
     listas_filtros: listasFiltros,
+    ultima_atualizacao: ultimaAtualizacao,
   };
 }

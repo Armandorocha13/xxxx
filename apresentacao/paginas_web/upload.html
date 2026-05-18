@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sincronização de Dados — FFA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #f4f6f9;
+            --surface: #ffffff;
+            --border: #e8ecf0;
+            --preto: #0d1117;
+            --cinza-700: #374151;
+            --cinza-500: #6b7280;
+            --cinza-300: #d1d5db;
+            --cinza-100: #f3f4f6;
+            --blue: #2563eb;
+            --green: #10b981;
+            --red: #e11d48;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.06);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── HEADER ── */
+        .app-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2.5rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo { height: 40px; width: auto; }
+
+        .brand-sep {
+            width: 1px;
+            height: 28px;
+            background: var(--border);
+        }
+
+        .brand-title {
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            color: var(--preto);
+        }
+
+        .header-right {
+            margin-left: auto;
+        }
+
+        .btn-voltar {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--cinza-500);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-voltar:hover {
+            background: var(--cinza-100);
+            color: var(--preto);
+        }
+
+        .btn-voltar i { width: 15px; height: 15px; }
+
+        /* ── CONTEÚDO CENTRAL ── */
+        .page-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+        }
+
+        .upload-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 740px;
+            overflow: hidden;
+        }
+
+        /* Card Header */
+        .card-header {
+            padding: 2rem 2.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header h2 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--preto);
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .card-header h2 i { width: 22px; height: 22px; color: var(--blue); }
+
+        .card-header p {
+            font-size: 0.83rem;
+            color: var(--cinza-500);
+            margin-top: 0.4rem;
+            font-weight: 500;
+        }
+
+        /* Dropzones */
+        .dropzones-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 2rem 2.5rem;
+        }
+
+        .dropzone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 2.2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--cinza-100);
+            position: relative;
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--blue);
+            background: rgba(37, 99, 235, 0.03);
+            transform: translateY(-2px);
+        }
+
+        .dropzone.success {
+            border-color: var(--green);
+            background: rgba(16, 185, 129, 0.04);
+        }
+
+        .dropzone input[type="file"] { display: none; }
+
+        .dz-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px; height: 28px;
+            background: var(--blue);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 800;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+        }
+
+        .dropzone.success .dz-num {
+            background: var(--green);
+        }
+
+        .dz-icon { color: var(--cinza-300); margin-bottom: 0.8rem; transition: color 0.25s; }
+        .dropzone.success .dz-icon { color: var(--green); }
+        .dropzone.dragover .dz-icon { color: var(--blue); }
+
+        .dz-title {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--preto);
+            margin-bottom: 0.3rem;
+        }
+
+        .dz-desc {
+            font-size: 0.78rem;
+            color: var(--cinza-500);
+            font-weight: 500;
+        }
+
+        .dz-file-name {
+            margin-top: 0.8rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--green);
+            word-break: break-all;
+            display: none;
+        }
+
+        /* Status */
+        .status-area {
+            margin: 0 2.5rem 2rem;
+            padding: 1.2rem 1.5rem;
+            border-radius: var(--radius-sm);
+            background: var(--cinza-100);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .status-title {
+            font-weight: 800;
+            font-size: 0.92rem;
+            color: var(--preto);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .status-desc {
+            font-size: 0.8rem;
+            color: var(--cinza-500);
+            font-weight: 500;
+        }
+
+        .status-area.processing { background: #eff6ff; border-color: #bfdbfe; }
+        .status-area.processing .status-title { color: #1e40af; }
+        .status-area.processing .status-desc { color: #3b82f6; }
+
+        .status-area.success { background: #f0fdf4; border-color: #bbf7d0; }
+        .status-area.success .status-title { color: #166534; }
+        .status-area.success .status-desc { color: #15803d; }
+
+        .status-area.error { background: #fef2f2; border-color: #fecaca; }
+        .status-area.error .status-title { color: #991b1b; }
+        .status-area.error .status-desc { color: #b91c1c; }
+
+        /* Redirect message */
+        .redirect-msg {
+            margin-top: 0.5rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #16a34a;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(244, 246, 249, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .loading-logo {
+            width: 120px;
+            height: auto;
+            animation: pulseLogo 2s infinite ease-in-out;
+            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.12));
+        }
+
+        .progress-bar-container {
+            width: 180px;
+            height: 3px;
+            background: var(--border);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 40%;
+            height: 100%;
+            background: var(--preto);
+            border-radius: 99px;
+            animation: loadingBar 1.4s infinite ease-in-out;
+        }
+
+        .loading-text {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--cinza-700);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.04); opacity: 1; }
+        }
+
+        @keyframes loadingBar {
+            0% { transform: translateX(-150%); }
+            100% { transform: translateX(350%); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .icon-spin { animation: spin 1.2s linear infinite; }
+
+        @media (max-width: 600px) {
+            .dropzones-grid { grid-template-columns: 1fr; }
+            .card-header, .dropzones-grid, .status-area { padding-left: 1.5rem; padding-right: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <img src="logo.png" alt="FFA" class="loading-logo">
+        <div class="progress-bar-container">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="loading-text" id="loading-text">Sincronizando dados...</div>
+    </div>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="brand">
+            <img src="logo.png" alt="Logo FFA" class="logo">
+            <div class="brand-sep"></div>
+            <span class="brand-title">ACEITES PENDENTES</span>
+        </div>
+        <div class="header-right">
+            <a href="/" class="btn-voltar">
+                <i data-lucide="arrow-left"></i> Voltar ao Dashboard
+            </a>
+        </div>
+    </header>
+
+    <!-- Conteúdo -->
+    <div class="page-content">
+        <div class="upload-card">
+
+            <div class="card-header">
+                <h2><i data-lucide="cloud-upload"></i> Sincronização de Dados</h2>
+                <p>Arraste ou clique nas áreas abaixo para anexar os relatórios. A atualização inicia automaticamente.</p>
+            </div>
+
+            <div class="dropzones-grid">
+                <!-- ETER -->
+                <div class="dropzone" id="dz-eter">
+                    <input type="file" id="file-eter" accept=".xlsx,.xls">
+                    <div class="dz-num">1</div>
+                    <i data-lucide="file-spreadsheet" class="dz-icon" style="width: 42px; height: 42px;"></i>
+                    <div class="dz-title">Relatório ETER</div>
+                    <div class="dz-desc">Arraste ou clique para anexar</div>
+                    <div class="dz-file-name" id="name-eter"></div>
+                </div>
+
+                <!-- EMIS -->
+                <div class="dropzone" id="dz-emis">
+                    <input type="file" id="file-emis" accept=".xlsx,.xls">
+                    <div class="dz-num">2</div>
+                    <i data-lucide="file-spreadsheet" class="dz-icon" style="width: 42px; height: 42px;"></i>
+                    <div class="dz-title">Relatório EMIS</div>
+                    <div class="dz-desc">Arraste ou clique para anexar</div>
+                    <div class="dz-file-name" id="name-emis"></div>
+                </div>
+            </div>
+
+            <div class="status-area" id="status-area">
+                <div class="status-title" id="status-title">
+                    <i data-lucide="info"></i> Aguardando Arquivos
+                </div>
+                <div class="status-desc" id="status-desc">
+                    Insira os dois relatórios para iniciar automaticamente.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const dzEter = document.getElementById('dz-eter');
+        const dzEmis = document.getElementById('dz-emis');
+        const inputEter = document.getElementById('file-eter');
+        const inputEmis = document.getElementById('file-emis');
+        const nameEter = document.getElementById('name-eter');
+        const nameEmis = document.getElementById('name-emis');
+        const statusArea = document.getElementById('status-area');
+        const statusTitle = document.getElementById('status-title');
+        const statusDesc = document.getElementById('status-desc');
+        const overlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
+
+        let fileEter = null;
+        let fileEmis = null;
+
+        function setupDropzone(dropzone, input, onFile) {
+            dropzone.addEventListener('click', () => input.click());
+            dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+            dropzone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+                if (e.dataTransfer.files.length) onFile(e.dataTransfer.files[0]);
+            });
+            input.addEventListener('change', e => { if (e.target.files.length) onFile(e.target.files[0]); });
+        }
+
+        function marcarPronto(dropzone, nameEl, file) {
+            file;
+            nameEl.textContent = file.name;
+            nameEl.style.display = 'block';
+            dropzone.classList.remove('dragover');
+            dropzone.classList.add('success');
+            dropzone.querySelector('.dz-desc').textContent = 'Anexado ✓';
+            const icon = dropzone.querySelector('.dz-icon');
+            if (icon) { icon.setAttribute('data-lucide', 'check-circle'); lucide.createIcons(); }
+        }
+
+        setupDropzone(dzEter, inputEter, file => { fileEter = file; marcarPronto(dzEter, nameEter, file); checkAndUpload(); });
+        setupDropzone(dzEmis, inputEmis, file => { fileEmis = file; marcarPronto(dzEmis, nameEmis, file); checkAndUpload(); });
+
+        async function checkAndUpload() {
+            if (!fileEter || !fileEmis) return;
+
+            overlay.classList.add('active');
+            statusArea.className = 'status-area processing';
+            statusTitle.innerHTML = '<i data-lucide="loader" class="icon-spin"></i> Sincronizando...';
+            statusDesc.textContent = 'Não feche esta página.';
+            lucide.createIcons();
+
+            try {
+                loadingText.textContent = 'Enviando ETER (1/2)...';
+                const fdEter = new FormData();
+                fdEter.append('projeto', 'ETER');
+                fdEter.append('arquivo', fileEter);
+                const resEter = await fetch('/api/upload', { method: 'POST', body: fdEter });
+                if (!resEter.ok) throw new Error('Falha ao processar arquivo ETER');
+
+                loadingText.textContent = 'Enviando EMIS (2/2)...';
+                const fdEmis = new FormData();
+                fdEmis.append('projeto', 'EMIS');
+                fdEmis.append('arquivo', fileEmis);
+                const resEmis = await fetch('/api/upload', { method: 'POST', body: fdEmis });
+                if (!resEmis.ok) throw new Error('Falha ao processar arquivo EMIS');
+
+                overlay.classList.remove('active');
+
+                statusArea.className = 'status-area success';
+                statusTitle.innerHTML = '<i data-lucide="check-circle-2"></i> Dados Atualizados!';
+                statusDesc.textContent = 'Ambos os arquivos foram processados com sucesso.';
+                lucide.createIcons();
+
+                // Adiciona mensagem de redirecionamento e volta automaticamente
+                const redirectMsg = document.createElement('div');
+                redirectMsg.className = 'redirect-msg';
+                redirectMsg.textContent = 'Voltando ao dashboard em 3 segundos...';
+                statusArea.appendChild(redirectMsg);
+
+                setTimeout(() => { window.location.href = '/'; }, 3000);
+
+            } catch (error) {
+                overlay.classList.remove('active');
+                statusArea.className = 'status-area error';
+                statusTitle.innerHTML = '<i data-lucide="alert-triangle"></i> Erro na Atualização';
+                statusDesc.textContent = error.message;
+                lucide.createIcons();
+            }
+        }
+    </script>
+</body>
+</html>

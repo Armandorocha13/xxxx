@@ -11,6 +11,7 @@ import path       from 'path';
 import { fileURLToPath, URL } from 'url';
 import { controladorDadosDashboard } from './controladores/controlador_dashboard.mjs';
 import { executarBuscarDadosDashboard } from './casos_de_uso/buscar_dados_dashboard.mjs';
+import { controladorUpload } from './controladores/controlador_upload.mjs';
 import { configuracoes }             from './configuracoes/configuracao_global.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -98,6 +99,11 @@ const servidor = http.createServer(async (req, res) => {
 
   if (url.pathname === '/api/dados_dashboard') {
     await controladorDadosDashboard(req, res, url);
+    return;
+  }
+
+  if (url.pathname === '/api/upload' && req.method === 'POST') {
+    await controladorUpload(req, res);
     return;
   }
 

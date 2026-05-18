@@ -161,3 +161,23 @@ export async function buscarListasFiltros(filtros = {}) {
     materiais: (materiais.rows || materiais).map(r => r[config.colunas.material]),
   };
 }
+
+export async function buscarUltimaAtualizacao(filtros = {}) {
+  const projeto = filtros.projeto === 'ETER' ? 'ETER' : 'EMIS';
+  const config = CONFIG_PROJETOS[projeto];
+  
+  try {
+    const resultado = await sql.query(`SELECT MAX(data_importacao) AS ultima_atualizacao FROM ${config.tabela}`);
+    const data = (resultado.rows || resultado)[0]?.ultima_atualizacao;
+    
+    if (!data) return 'Sem dados importados';
+    
+    return new Date(data).toLocaleString('pt-BR', { 
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  } catch (err) {
+    console.error('Erro ao buscar ultima atualizacao:', err);
+    return 'Desconhecido';
+  }
+}
