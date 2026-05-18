@@ -181,3 +181,156 @@ export async function buscarUltimaAtualizacao(filtros = {}) {
     return 'Desconhecido';
   }
 }
+
+/**
+ * Retorna técnicos com itens pendentes há mais de `limiarDias` dias.
+ * Usado no modal de alertas ao abrir o dashboard.
+ */
+export async function buscarAlertasAging(filtros = {}, limiarDias = 30) {
+  const projeto = filtros.projeto === 'ETER' ? 'ETER' : 'EMIS';
+  const config = CONFIG_PROJETOS[projeto];
+
+  try {
+    const resultado = await sql.query(`
+      SELECT
+        ${config.colunas.tecnico} AS nome,
+        ${config.colunas.base}    AS base,
+        COUNT(*)                                                       AS total,
+        MAX(DATE_PART('day', NOW() - ${config.colunas.data}))::int    AS max_dias,
+        ROUND(AVG(DATE_PART('day', NOW() - ${config.colunas.data})))::int AS media_dias
+      FROM ${config.tabela}
+      WHERE ${config.condicao_pendente}
+        AND ${config.colunas.data} IS NOT NULL
+        AND DATE_PART('day', NOW() - ${config.colunas.data}) > $1
+      GROUP BY ${config.colunas.tecnico}, ${config.colunas.base}
+      ORDER BY max_dias DESC
+      LIMIT 15
+    `, [limiarDias]);
+
+    return resultado.rows || resultado;
+  } catch (err) {
+    console.error('Erro ao buscar alertas de aging:', err);
+    return [];
+  }
+}
+
+/**
+ * Retorna aging médio por data para o gráfico de linhas.
+ * Eixo X = data de criação/alteração; Eixo Y = dias de aging.
+ */
+export async function buscarAgingPorData(filtros = {}) {
+  const projeto = filtros.projeto === 'ETER' ? 'ETER' : 'EMIS';
+
+  try {
+    let query;
+    if (projeto === 'EMIS') {
+      query = `
+        SELECT
+          dt_solicitacao::date AS data_ref,
+          ROUND(AVG(DATE_PART('day', NOW() - dt_solicitacao::timestamp)))::int AS media_dias,
+          COUNT(*) AS quantidade
+        FROM movimentacao_tecnico
+        WHERE dt_solicitacao IS NOT NULL AND dt_solicitacao <> ''
+          AND dt_solicitacao::date >= NOW() - INTERVAL '180 days'
+          AND (aceite_destinatario = 'Sem resposta' OR aceite_destinatario IS NULL
+               OR aceite_destinatario = '' OR aceite_destinatario = 'Pendente')
+        GROUP BY dt_solicitacao::date
+        ORDER BY data_ref
+      `;
+    } else {
+      query = `
+        SELECT
+          to_date(NULLIF(data_alteracao, ''), 'DD/MM/YYYY') AS data_ref,
+          ROUND(AVG(DATE_PART('day', NOW() - to_timestamp(NULLIF(data_alteracao, ''), 'DD/MM/YYYY'))))::int AS media_dias,
+          COUNT(*) AS quantidade
+        FROM relatorio_equipamento
+        WHERE data_alteracao IS NOT NULL AND data_alteracao <> ''
+          AND to_date(NULLIF(data_alteracao, ''), 'DD/MM/YYYY') >= NOW() - INTERVAL '180 days'
+        GROUP BY data_ref
+        ORDER BY data_ref
+      `;
+    }
+
+    const resultado = await sql.query(query);
+    return (resultado.rows || resultado).map(r => ({
+      data: r.data_ref ? new Date(r.data_ref).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '?',
+      media_dias: r.media_dias || 0,
+      quantidade: parseInt(r.quantidade || 0),
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar aging por data:', err);
+    return [];
+  }
+}
+
+/**
+ * Retorna resumo unificado de pendências para EMIS e ETER por técnico.
+ * Garante a criação de uma VIEW no banco e busca a partir dela.
+ */
+export async function buscarResumoUnificado() {
+  try {
+    // Dropa a view existente se houver conflito de colunas
+    await sql.query(`DROP VIEW IF EXISTS view_resumo_pendencias CASCADE;`);
+
+    // 1. Cria ou substitui a VIEW para garantir integridade e performance
+    await sql.query(`
+      CREATE OR REPLACE VIEW view_resumo_pendencias AS
+      WITH emis_pendentes AS (
+        SELECT
+          recebido_por AS nome,
+          COUNT(*)::int AS qtd,
+          string_agg(DISTINCT miscelanea, ', ') AS materiais,
+          string_agg(DISTINCT base, ', ') AS bases,
+          COALESCE(MAX(DATE_PART('day', NOW() - COALESCE(NULLIF(dt_resposta, ''), dt_solicitacao)::timestamp)), 0)::int AS dias
+        FROM movimentacao_tecnico
+        WHERE (aceite_destinatario = 'Sem resposta' OR aceite_destinatario IS NULL OR aceite_destinatario = '' OR aceite_destinatario = 'Pendente')
+          AND dt_solicitacao IS NOT NULL AND dt_solicitacao <> ''
+        GROUP BY recebido_por
+      ),
+      eter_pendentes AS (
+        SELECT
+          tecnico AS nome,
+          COUNT(*)::int AS qtd,
+          string_agg(DISTINCT descricao, ', ') AS materiais,
+          string_agg(DISTINCT base, ', ') AS bases,
+          COALESCE(MAX(DATE_PART('day', NOW() - to_timestamp(NULLIF(data_alteracao, ''), 'DD/MM/YYYY'))), 0)::int AS dias
+        FROM relatorio_equipamento
+        WHERE data_alteracao IS NOT NULL AND data_alteracao <> ''
+        GROUP BY tecnico
+      )
+      SELECT
+        COALESCE(e.nome, et.nome) AS nome,
+        COALESCE(e.qtd, 0)::int AS emis_qtd,
+        COALESCE(et.qtd, 0)::int AS eter_qtd,
+        (COALESCE(e.qtd, 0) + COALESCE(et.qtd, 0))::int AS total_qtd,
+        GREATEST(COALESCE(e.dias, 0), COALESCE(et.dias, 0))::int AS dias_max,
+        COALESCE(e.dias, 0)::int AS emis_dias,
+        COALESCE(et.dias, 0)::int AS eter_dias,
+        COALESCE(e.materiais, '') AS emis_materiais,
+        COALESCE(et.materiais, '') AS eter_materiais,
+        TRIM(BOTH ', ' FROM COALESCE(e.bases, '') || ', ' || COALESCE(et.bases, '')) AS bases
+      FROM emis_pendentes e
+      FULL OUTER JOIN eter_pendentes et ON LOWER(TRIM(e.nome)) = LOWER(TRIM(et.nome))
+      ORDER BY total_qtd DESC;
+    `);
+
+    // 2. Consulta os dados da VIEW
+    const resultado = await sql.query(`SELECT * FROM view_resumo_pendencias`);
+    return (resultado.rows || resultado).map(r => ({
+      nome: r.nome || 'N/A',
+      emis_qtd: parseInt(r.emis_qtd || 0),
+      eter_qtd: parseInt(r.eter_qtd || 0),
+      total_qtd: parseInt(r.total_qtd || 0),
+      dias_max: parseInt(r.dias_max || 0),
+      emis_dias: parseInt(r.emis_dias || 0),
+      eter_dias: parseInt(r.eter_dias || 0),
+      emis_materiais: r.emis_materiais || '',
+      eter_materiais: r.eter_materiais || '',
+      bases: r.bases || ''
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar resumo unificado:', err);
+    return [];
+  }
+}
+

@@ -21,3 +21,13 @@ export async function buscarDados(filtros = {}) {
     if (!resposta.ok) throw new Error(`Erro HTTP ${resposta.status}`);
     return resposta.json();
 }
+
+/**
+ * Busca o resumo unificado de pendências (EMIS e ETER por técnico).
+ * @returns {Promise<Array>}
+ */
+export async function buscarResumoUnificado() {
+    const resposta = await fetch('/api/resumo_unificado');
+    if (!resposta.ok) throw new Error(`Erro HTTP ${resposta.status}`);
+    return resposta.json();
+}

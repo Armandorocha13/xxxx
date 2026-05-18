@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "servidor.mjs",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "apresentacao/paginas_web/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "servidor.mjs"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "apresentacao/paginas_web/$1"
+    }
+  ]
+}

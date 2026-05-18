@@ -11,8 +11,8 @@ import path       from 'path';
 import { fileURLToPath, URL } from 'url';
 import { controladorDadosDashboard } from './controladores/controlador_dashboard.mjs';
 import { executarBuscarDadosDashboard } from './casos_de_uso/buscar_dados_dashboard.mjs';
-import { controladorUpload } from './controladores/controlador_upload.mjs';
 import { configuracoes }             from './configuracoes/configuracao_global.mjs';
+import { buscarResumoUnificado }     from './repositorios/repositorio_aceites.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -93,8 +93,8 @@ function mapearRespostaLegada(dados) {
   };
 }
 
-/** Roteador de requisições */
-const servidor = http.createServer(async (req, res) => {
+/** Roteador de requisições compatível com Vercel e Local */
+export default async function handler(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
   if (url.pathname === '/api/dados_dashboard') {
@@ -106,6 +106,7 @@ const servidor = http.createServer(async (req, res) => {
     await controladorUpload(req, res);
     return;
   }
+
 
   if (url.pathname === '/api/data') {
     const filtros = {
@@ -127,9 +128,25 @@ const servidor = http.createServer(async (req, res) => {
     return;
   }
 
-  servirArquivo(url.pathname, res);
-});
+  if (url.pathname === '/api/resumo_unificado') {
+    try {
+      const dados = await buscarResumoUnificado();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(dados));
+    } catch (erro) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ erro: 'Erro ao buscar resumo unificado' }));
+    }
+    return;
+  }
 
-servidor.listen(configuracoes.porta, () => {
-  console.log(`✅ Servidor rodando em http://localhost:${configuracoes.porta}`);
-});
+  servirArquivo(url.pathname, res);
+}
+
+// Só escuta na porta local se não estiver rodando como Vercel Serverless Function
+if (!process.env.VERCEL) {
+  const servidor = http.createServer(handler);
+  servidor.listen(configuracoes.porta, () => {
+    console.log(`✅ Servidor rodando em http://localhost:${configuracoes.porta}`);
+  });
+}

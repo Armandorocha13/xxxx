@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aceites Pendentes — FFA</title>
+    <title>ACEITE PENDENTES - EMIS X ETER</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <meta name="description" content="Dashboard corporativo para monitoramento de aceites pendentes EMIS/ETER">
     <link rel="stylesheet" href="estilo.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +16,7 @@
 <body>
 
     <!-- ═══ HEADER ═══ -->
-    <header class="app-header">
+    <header class="app-header" id="app-header">
         <div class="header-inner">
             <!-- Brand -->
             <div class="brand">
@@ -24,13 +25,14 @@
                 <span class="brand-title">ACEITES PENDENTES</span>
             </div>
 
-            <!-- Projeto Toggle -->
+            <!-- Projeto Toggle (desktop) -->
             <nav class="projeto-toggle" aria-label="Projeto">
                 <button id="btn-emis" class="toggle-btn active" aria-pressed="true">EMIS</button>
                 <button id="btn-eter" class="toggle-btn" aria-pressed="false">ETER</button>
+                <button id="btn-resumo" class="toggle-btn" aria-pressed="false">RESUMO</button>
             </nav>
 
-            <!-- Ações rápidas -->
+            <!-- Ações (desktop) -->
             <div class="header-actions">
                 <div class="sync-info">
                     <i data-lucide="clock" class="sync-icon"></i>
@@ -41,9 +43,16 @@
                     Sincronizar
                 </a>
             </div>
+
+            <!-- Hamburger (mobile) -->
+            <button id="btn-menu-mobile" class="btn-hamburger" aria-label="Menu" aria-expanded="false">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
         </div>
 
-        <!-- ═══ BARRA DE FILTROS ═══ -->
+        <!-- ═══ FILTROS ═══ -->
         <div class="filtros-bar">
             <div id="container-filtro-status" class="filtro-item">
                 <label for="filtro-status"><i data-lucide="activity"></i> Status</label>
@@ -65,11 +74,43 @@
                     <option value="all">Todas as bases</option>
                 </select>
             </div>
-            <div class="filtro-item">
+            <div id="container-filtro-material" class="filtro-item">
                 <label for="filtro-material"><i data-lucide="package"></i> Material</label>
                 <select id="filtro-material">
                     <option value="all">Todos os materiais</option>
                 </select>
+            </div>
+        </div>
+
+        <!-- Menu Mobile -->
+        <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+            <div class="mobile-menu-inner">
+                <nav class="mobile-projeto-toggle">
+                    <button id="btn-emis-mobile" class="toggle-btn active">EMIS</button>
+                    <button id="btn-eter-mobile" class="toggle-btn">ETER</button>
+                    <button id="btn-resumo-mobile" class="toggle-btn">RESUMO</button>
+                </nav>
+                <div class="mobile-filtros">
+                    <div class="filtro-item">
+                        <label for="filtro-status-m">Status</label>
+                        <select id="filtro-status-m"><option value="all">Todos</option><option value="Pendente">Pendente</option><option value="Aceito">Aceito</option></select>
+                    </div>
+                    <div class="filtro-item">
+                        <label for="filtro-nome-m">Técnico</label>
+                        <select id="filtro-nome-m"><option value="all">Todos</option></select>
+                    </div>
+                    <div class="filtro-item">
+                        <label for="filtro-base-m">Base</label>
+                        <select id="filtro-base-m"><option value="all">Todas</option></select>
+                    </div>
+                    <div class="filtro-item">
+                        <label for="filtro-material-m">Material</label>
+                        <select id="filtro-material-m"><option value="all">Todos</option></select>
+                    </div>
+                </div>
+                <a href="/upload.html" class="btn-upload" style="width:100%; justify-content:center;">
+                    <i data-lucide="upload-cloud"></i> Sincronizar
+                </a>
             </div>
         </div>
     </header>
@@ -151,9 +192,91 @@
             </div>
         </section>
 
+        <!-- Resumo Unificado (Inicialmente oculto) -->
+        <section id="secao-resumo" class="card resumo-unificado-card" style="display: none;" aria-label="Resumo Unificado EMIS e ETER">
+            <div class="card-header">
+                <div>
+                    <h2><i data-lucide="clipboard-list"></i> Resumo Consolidado de Pendências</h2>
+                    <p>Visão unificada para ambos os projetos. Clique no nome do técnico para expandir o detalhamento.</p>
+                </div>
+            </div>
+            <div class="tabela-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="alinhar-centro">TÉCNICO</th>
+                            <th class="alinhar-centro">PENDÊNCIAS EMIS</th>
+                            <th class="alinhar-centro">PENDÊNCIAS ETER</th>
+                            <th class="alinhar-centro">DIAS ATIVOS (MÁX)</th>
+                            <th class="alinhar-centro">TOTAL ACUMULADO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpo-tabela-resumo">
+                        <!-- Inserido dinamicamente via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Gráficos do Resumo -->
+            <div class="graficos-row" id="graficos-resumo-container" style="margin-top: 2.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="card grafico-card">
+                    <div class="card-header">
+                        <div>
+                            <h2><i data-lucide="bar-chart-3"></i> TOP 5 Pendências</h2>
+                            <p>Técnicos com maior total acumulado (EMIS + ETER)</p>
+                        </div>
+                    </div>
+                    <div class="canvas-box" style="height: 260px; position: relative;">
+                        <canvas id="grafico-resumo-tecnicos"></canvas>
+                    </div>
+                </div>
+                <div class="card grafico-card">
+                    <div class="card-header">
+                        <div>
+                            <h2><i data-lucide="pie-chart"></i> Proporção por Projeto</h2>
+                            <p>Distribuição de pendências ativas</p>
+                        </div>
+                    </div>
+                    <div class="canvas-box" style="height: 260px; position: relative;">
+                        <canvas id="grafico-resumo-projetos"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <script type="module" src="aplicacao.js"></script>
-    <script>lucide.createIcons();</script>
+    <script>
+        lucide.createIcons();
+
+        // ── Scroll: adiciona classe ao header ───────────────────
+        const header = document.getElementById('app-header');
+        window.addEventListener('scroll', () => {
+            header.classList.toggle('scrolled', window.scrollY > 10);
+        }, { passive: true });
+
+        // ── Hamburger: toggle menu mobile ──────────────────
+        const btnHamburger = document.getElementById('btn-menu-mobile');
+        const mobileMenu   = document.getElementById('mobile-menu');
+
+        btnHamburger.addEventListener('click', () => {
+            const isOpen = mobileMenu.classList.toggle('open');
+            btnHamburger.classList.toggle('open', isOpen);
+            header.classList.toggle('menu-open', isOpen);
+            btnHamburger.setAttribute('aria-expanded', String(isOpen));
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        });
+
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!header.contains(e.target) && mobileMenu.classList.contains('open')) {
+                mobileMenu.classList.remove('open');
+                btnHamburger.classList.remove('open');
+                header.classList.remove('menu-open');
+                document.body.style.overflow = '';
+            }
+        });
+    </script>
 </body>
 </html>

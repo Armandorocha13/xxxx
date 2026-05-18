@@ -12,4 +12,16 @@ describe('Server API Integration', () => {
     const data = await response.json();
     expect(data).toHaveProperty('kpis');
   });
+
+  it('should return 200 and a list of unified pending technicians from /api/resumo_unificado', async () => {
+    const response = await fetch('http://localhost:3000/api/resumo_unificado');
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(Array.isArray(data)).toBe(true);
+    if (data.length > 0) {
+      expect(data[0]).toHaveProperty('nome');
+      expect(data[0]).toHaveProperty('emis_materiais');
+      expect(data[0]).toHaveProperty('eter_materiais');
+    }
+  });
 });
