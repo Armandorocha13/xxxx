@@ -292,7 +292,7 @@ export async function buscarResumoUnificado() {
           tecnico AS nome,
           COUNT(*)::int AS qtd,
           string_agg(DISTINCT descricao, ', ') AS materiais,
-          string_agg(DISTINCT base, ', ') AS bases,
+          string_agg(DISTINCT cidade, ', ') AS bases,
           COALESCE(MAX(DATE_PART('day', NOW() - to_timestamp(NULLIF(data_alteracao, ''), 'DD/MM/YYYY'))), 0)::int AS dias
         FROM relatorio_equipamento
         WHERE data_alteracao IS NOT NULL AND data_alteracao <> ''
